@@ -1,10 +1,11 @@
 import networkx as nx
 
-def _create_graph(spectrum, l):
+
+def _create_graph(spect, l):
 	G = nx.MultiDiGraph()
-	vertices = list(set(map(lambda x: x[:-1], spectrum)))
+	vertices = list(set(map(lambda x: x[:-1], spect)))
 	arr = []
-	for el in spectrum:
+	for el in spect:
 		for vert in vertices:
 			for x in range(l-1, -1, -1):
 				if x == 0:
@@ -15,6 +16,7 @@ def _create_graph(spectrum, l):
 	print(list(G.edges(data=True)))
 	return G
 
+
 if __name__ == '__main__':
-	spectrum, l = ["AAA", "AAC", "ACA", "CAC", "CAA", "ACG", "CGC", "GCA", "ACT", "CTT", "TTA", "TAA"], 3
-	graph = _create_graph(spectrum, l)
+	spectrum, length = ["AAA", "AAC", "ACA", "CAC", "CAA", "ACG", "CGC", "GCA", "ACT", "CTT", "TTA", "TAA"], 3
+	graph = _create_graph(spectrum, length)
