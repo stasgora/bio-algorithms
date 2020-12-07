@@ -15,7 +15,7 @@ Em = [
 ]
 
 
-def viterbi(O, S, P, Y, Tm, Em):
+def viterbi(S, P, Y, Tm, Em):
 	T1 = [[0 for _ in range(len(Y))] for _ in range(len(S))]
 	T2 = [[0 for _ in range(len(Y))] for _ in range(len(S))]
 	for i in range(len(S)):
@@ -51,4 +51,4 @@ def viterbi(O, S, P, Y, Tm, Em):
 
 print(''.join(map(str, Y2)))
 print(D2)
-print(''.join(viterbi(O, S, P, Y2, Tm, Em)))
+print(''.join(viterbi(S, P, Y2, Tm, Em)))
