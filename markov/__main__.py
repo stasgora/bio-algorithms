@@ -1,4 +1,5 @@
 import getopt
+import random
 import sys
 from forward_backward import *
 from viterbi import *
@@ -37,13 +38,30 @@ def parse_probabilities(file):
 		return P, Tm, Em
 
 
+def generate_rolls():
+	lines = ['', '']
+	state = 0
+	if random.random() < P[1]:
+		state = 1
+	for i in range(60):
+		switched_state = (state + 1) % 2
+		if i > 0 and random.random() < Tm[state][switched_state]:
+			state = switched_state
+		lines[0] += str(random.choices(list(range(1, 7)), Em[state])[0])
+		lines[1] += 'F' if state == 0 else 'L'
+	return lines
+
+
 probabilities_file, rolls_file = parse_args()
 P, Tm, Em = parse_probabilities(probabilities_file)
-with open(rolls_file) as input:
-	lines = input.read().splitlines()
-	# generate if not given
-	print('Rolls:     ' + lines[0])
-	print('Die:       ' + lines[1])
-	observations = [int(i) for i in lines[0]]
-	print('Viterbi:   ' + ''.join(viterbi(S, P, observations, Tm, Em)))
-	print('Posterior: ' + ''.join(forward_backward(observations, S, P, Tm, Em)))
+if rolls_file is None:
+	lines = generate_rolls()
+else:
+	with open(rolls_file) as input:
+		lines = input.read().splitlines()
+
+print('Rolls:     ' + lines[0])
+print('Die:       ' + lines[1])
+observations = [int(i) for i in lines[0]]
+print('Viterbi:   ' + ''.join(viterbi(S, P, observations, Tm, Em)))
+print('Posterior: ' + ''.join(forward_backward(observations, S, P, Tm, Em)))
