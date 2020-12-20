@@ -63,5 +63,8 @@ else:
 print('Rolls:     ' + lines[0])
 print('Die:       ' + lines[1])
 observations = [int(i) for i in lines[0]]
-print('Viterbi:   ' + ''.join(viterbi(S, P, observations, Tm, Em)))
-print('Posterior: ' + ''.join(forward_backward(observations, S, P, Tm, Em)))
+viter = viterbi(S, P, observations, Tm, Em)
+forw_back = forward_backward(observations, S, P, Tm, Em)
+percent = lambda obs: str(round(sum([obs[i] == lines[1][i] for i in range(len(observations))]) / len(observations) * 100, 2))
+print('Viterbi:   ' + ''.join(viter) + ' (' + percent(viter) + '%)')
+print('Posterior: ' + ''.join(forw_back) + ' (' + percent(forw_back) + '%)')
