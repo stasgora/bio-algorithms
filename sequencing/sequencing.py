@@ -3,6 +3,8 @@ import networkx as nx
 PROFIT = 'profit'
 VALUE = 'value'
 
+max_depth = 0
+
 def _create_graph(spect, l):
 	G = nx.MultiDiGraph()
 	vertices = list(set(map(lambda x: x[:-1], spect)))
@@ -22,12 +24,12 @@ def _create_graph(spect, l):
 	return G
 
 
-def _find_euler(G, n, l):
+def _find_euler(G):
 	arr = []
 	print("--------------EULER--------------")
 	for val in G.nodes:
 		copy = G
-		arr = _check_node(copy.copy(), val, 12, [val])
+		arr = _check_node(copy.copy(), val, max_depth, [val])
 		if type(arr) is list:
 			break
 	return arr
@@ -37,18 +39,17 @@ def _check_node(copy, node, depth, routes):
 	if depth == 0:
 		print("Finished checking! Returning results...")
 		return routes
-	print("Checking " + node + "'s edges")
+	print("    " * (max_depth - depth) + "Checking " + node + "'s edges")
 	for routeNode in copy[node]:
-		print("    checking: " + routeNode)
 		for route in copy[node][routeNode]:
 			if copy[node][routeNode][route][PROFIT] == 2:
-				print("        can go by " + copy[node][routeNode][route][VALUE] + " with profit " + str(copy[node][routeNode][route][PROFIT]))
+				print("    " * (max_depth - depth) + "Going to " + routeNode + " by " + copy[node][routeNode][route][VALUE] + " with profit " + str(copy[node][routeNode][route][PROFIT]))
 				ret = _check_node(_remove_edges(copy, node, copy[node][routeNode][route][VALUE]), routeNode, depth - 1, routes + [copy[node][routeNode][route][VALUE], routeNode])
 				if type(ret) is not bool:
 					return ret
 				else:
-					print("Bad route :( Moving back....")
-	print("Really bad node!!! Moving back harder.....")
+					print("    " * (max_depth - depth) + "Bad route :( Moving back....")
+	print("    " * (max_depth - depth) + "Really bad node!!! Moving back harder.....")
 	return False
 
 
@@ -73,7 +74,7 @@ def _make_spectrum_nice_no_errors(arr):
 			continue
 		elif i % 2 == 0:
 			arr[i] = arr[i][-1]
-	sp = ''.join(arr[1::2])
+	sp = ''.join(arr[0::2])
 	print(sp)
 	values = []
 	for i in range(len(sp)-2):
@@ -83,6 +84,9 @@ def _make_spectrum_nice_no_errors(arr):
 
 if __name__ == '__main__':
 	spectrum, length = ["AAA", "AAC", "ACA", "CAC", "CAA", "ACG", "CGC", "GCA", "ACT", "CTT", "TTA", "TAA"], 3
+	# spectrum, length = ["AAA", "AAC", "ACA", "CAC", "CAA"], 3
+	max_depth = len(spectrum)
+
 	graph = _create_graph(spectrum, length)
-	_make_spectrum_nice_no_errors(_find_euler(graph, len(spectrum), length))
+	_make_spectrum_nice_no_errors(_find_euler(graph))
 
