@@ -36,13 +36,14 @@ def _find_euler(G):
 
 
 def _check_node(copy, node, depth, routes):
-	if depth == 0:
-		print("Finished checking! Returning results...")
-		return routes
 	print("    " * (max_depth - depth) + "Checking " + node + "'s edges")
 	for routeNode in copy[node]:
 		for route in copy[node][routeNode]:
-			if copy[node][routeNode][route][PROFIT] == 2:
+			if depth == 1:
+				print("Finished checking! Returning results...")
+				lastVal = copy[node][routeNode][route][VALUE]
+				return routes + [lastVal,  routes[-1][-1] + lastVal]
+			if copy[node][routeNode][route][PROFIT] == len(node):
 				print("    " * (max_depth - depth) + "Going to " + routeNode + " by " + copy[node][routeNode][route][VALUE] + " with profit " + str(copy[node][routeNode][route][PROFIT]))
 				ret = _check_node(_remove_edges(copy, node, copy[node][routeNode][route][VALUE]), routeNode, depth - 1, routes + [copy[node][routeNode][route][VALUE], routeNode])
 				if type(ret) is not bool:
@@ -65,7 +66,7 @@ def _remove_edges(G, node, val):
 	return copied
 
 
-def _make_spectrum_nice_no_errors(arr):
+def _make_spectrum_nice_no_errors(arr, length):
 	if type(arr) is bool:
 		print("Couldn't find proper spectrum....")
 		return
@@ -77,16 +78,18 @@ def _make_spectrum_nice_no_errors(arr):
 	sp = ''.join(arr[0::2])
 	print(sp)
 	values = []
-	for i in range(len(sp)-2):
-		values.append(sp[i:i+3])
+	for i in range(len(sp)-length+1):
+		values.append(sp[i:i+length])
 	print(values)
 
 
 if __name__ == '__main__':
-	spectrum, length = ["AAA", "AAC", "ACA", "CAC", "CAA", "ACG", "CGC", "GCA", "ACT", "CTT", "TTA", "TAA"], 3
-	# spectrum, length = ["AAA", "AAC", "ACA", "CAC", "CAA"], 3
-	max_depth = len(spectrum)
+	# spectrum = ["AAA", "AAT", "AAC", "ACA", "CAC", "CAA", "ACG", "CGC", "GCA", "ACT", "CTT", "TTA", "TAA"]
+	spectrum = ["PPPPPPct", "PPPPPcta", "PPPPctaa", "PPPctaaG", "PPctaaGG", "PctaaGGT", "ctaaGGTC", "taaGGTCC", "aaGGTCCC", "aGGTCCCT", "GGTCCCTe", "GTCCCTea"]
+	# spectrum = ["ACG", "CCG", "CGA", "CGT", "GAC"]
 
+	max_depth = len(spectrum)
+	length = len(spectrum[0])
 	graph = _create_graph(spectrum, length)
-	_make_spectrum_nice_no_errors(_find_euler(graph))
+	_make_spectrum_nice_no_errors(_find_euler(graph), length)
 
