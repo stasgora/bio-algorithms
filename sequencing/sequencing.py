@@ -84,12 +84,19 @@ def _make_spectrum_nice_no_errors(arr, length):
 
 
 if __name__ == '__main__':
-	# spectrum = ["AAA", "AAT", "AAC", "ACA", "CAC", "CAA", "ACG", "CGC", "GCA", "ACT", "CTT", "TTA", "TAA"]
-	spectrum = ["PPPPPPct", "PPPPPcta", "PPPPctaa", "PPPctaaG", "PPctaaGG", "PctaaGGT", "ctaaGGTC", "taaGGTCC", "aaGGTCCC", "aGGTCCCT", "GGTCCCTe", "GTCCCTea"]
+	spectrum = ["AAA", "AAT", "AAC", "ACA", "CAC", "CAA", "ACG", "CGC", "GCA", "ACT", "CTT", "TTA", "TAA"]
+	# spectrum = ["PPPPPPct", "PPPPPcta", "PPPPctaa", "PPPctaaG", "PPctaaGG", "PctaaGGT", "ctaaGGTC", "taaGGTCC", "aaGGTCCC", "aGGTCCCT", "GGTCCCTe", "GTCCCTea"]
 	# spectrum = ["ACG", "CCG", "CGA", "CGT", "GAC"]
 
 	max_depth = len(spectrum)
 	length = len(spectrum[0])
-	graph = _create_graph(spectrum, length)
-	_make_spectrum_nice_no_errors(_find_euler(graph), length)
+	stop = False
+	for el in spectrum:
+		if len(el) != length:
+			print("Invalid input - wrong length!!!")
+			stop = True
+			break
+	if not stop:
+		graph = _create_graph(spectrum, length)
+		_make_spectrum_nice_no_errors(_find_euler(graph), length)
 
