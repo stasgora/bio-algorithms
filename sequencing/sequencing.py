@@ -3,8 +3,8 @@ import networkx as nx
 PROFIT = 'profit'
 VALUE = 'value'
 INITIAL = 'initial'
-MAX_ANSWERS = 50
-DONE = 'done'
+MAX_ANSWERS = 100
+FILE = 'data.txt'
 
 max_depth = 0
 max_profit = 0
@@ -63,20 +63,20 @@ def _check_node(copy, node, depth, routes, spectrum, neg_errors_left):
 						if copy[node][routeNode][route][INITIAL]:
 							spec_copy.remove(node + copy[node][routeNode][route][VALUE])
 						if len(spec_copy) == positive_errors:
-							answer = routes + [lastVal, copy[node][routeNode][route][PROFIT], routes[-1][-1] + lastVal]
+							answer = routes + [lastVal, copy[node][routeNode][route][PROFIT], routes[1:][-1] + lastVal]
 							if answer not in answers:
 								answers = answers + [answer]
 								if len(answers) == MAX_ANSWERS:
-									return DONE
-					elif copy[node][routeNode][route][INITIAL] and routes[-1][-1] + lastVal not in copy.nodes:
+									return []
+					elif copy[node][routeNode][route][INITIAL] and routes[1:][-1] + lastVal not in copy.nodes:
 						spec_copy = spectrum[:]
 						spec_copy.remove(node + copy[node][routeNode][route][VALUE])
 						if len(spec_copy) == positive_errors:
-							answer = routes + [lastVal, copy[node][routeNode][route][PROFIT], routes[-1][-1] + lastVal]
+							answer = routes + [lastVal, copy[node][routeNode][route][PROFIT], routes[1:][-1] + lastVal]
 							if answer not in answers:
 								answers = answers + [answer]
 								if len(answers) == MAX_ANSWERS:
-									return DONE
+									return []
 				elif neg_errors_left + copy[node][routeNode][route][PROFIT] - max_profit >= 0 and copy[node][routeNode][route][PROFIT] == i:
 					# print("    " * (max_depth - depth) + "Going to " + routeNode + " by " + copy[node][routeNode][route][VALUE] + " with profit " + str(copy[node][routeNode][route][PROFIT]))
 					spec_copy = spectrum[:]
@@ -124,7 +124,7 @@ def _make_answers_nice():
 					if err_sum == 0 and negative_errors > 1 and length < 4:
 						spec.append(answer[i - 1] + 'X' * max(0, negative_errors - length + 1) + answer[i + 1])
 					else:
-						spec.append(answer[i + 1][len(answer[i + 1]) - err_sum - 1:])
+						spec.append(answer[i + 1][len(answer[i + 1]) - negative_errors + err_sum - 1:])
 				else:
 					err_sum += max_profit - answer[i]
 					if answer[i] == 0 and length < 4:
@@ -139,11 +139,11 @@ def _make_answers_nice():
 	return
 
 if __name__ == '__main__':
-	positive_errors = 0
-	negative_errors = 2
-	spectrum = ["AAA", "AAC", "CGC", "ACA", "CAC", "ACG", "CAA", "GCA", "ACT", "TTA", "CTT", "TAA"]
-	# spectrum = ["AAAAAACT", "AAAAACTA", "AAAACTAA", "AAACTAAG", "AACTAAGG", "ACTAAGGT", "CTAAGGTC", "TAAGGTCC", "AAGGTCCC", "AGGTCCCT", "GGTCCCTG", "GTCCCTGA"]
-	# spectrum = ["ACG", "CGC", "GCA", "CAA", "AAT"]
+	f = open(FILE, "r")
+	spectrum = f.readline().split()
+	positive_errors = int(f.readline())
+	negative_errors = int(f.readline())
+	f.close()
 
 	max_depth = len(spectrum) - positive_errors
 	max_profit = len(spectrum[0]) - 1
