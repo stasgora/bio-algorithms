@@ -3,10 +3,16 @@ import networkx as nx
 PROFIT = 'profit'
 VALUE = 'value'
 INITIAL = 'initial'
+MAX_ANSWERS = 50
+DONE = 'done'
 
 max_depth = 0
 max_profit = 0
 positive_errors = 0
+length = 0
+answers = []
+negative_errors = 0
+
 
 def _create_graph(spect, l):
 	G = nx.MultiDiGraph()
@@ -34,38 +40,45 @@ def _create_graph(spect, l):
 
 
 def _find_euler(G, spectrum, neg_errors):
-	arr = []
 	print("--------------EULER--------------")
 	for val in G.nodes:
 		copy = G
-		arr = _check_node(copy.copy(), val, max_depth, [val], spectrum, neg_errors)
-		if type(arr) is list:
+		ret = _check_node(copy.copy(), val, max_depth, [val], spectrum, neg_errors)
+		if type(ret) is not bool:
 			break
-	return arr
+	return
 
 
 def _check_node(copy, node, depth, routes, spectrum, neg_errors_left):
-	print("    " * (max_depth - depth) + "Checking " + node + "'s edges")
+	# print("    " * (max_depth - depth) + "Checking " + node + "'s edges")
 	for routeNode in copy[node]:
 		for route in copy[node][routeNode]:
 			for i in range(max_profit, -1, -1):
-				if depth == 1:
+				if depth == 1 and copy[node][routeNode][route][PROFIT] == i:
+					global answers
+					lastVal = copy[node][routeNode][route][VALUE]
 					if neg_errors_left + copy[node][routeNode][route][PROFIT] - max_profit == 0:
-						print("Finished checking! Returning results...")
+						# print("Finished checking! Returning results...")
 						spec_copy = spectrum[:]
 						if copy[node][routeNode][route][INITIAL]:
 							spec_copy.remove(node + copy[node][routeNode][route][VALUE])
 						if len(spec_copy) == positive_errors:
-							lastVal = copy[node][routeNode][route][VALUE]
-							return routes + [lastVal, copy[node][routeNode][route][PROFIT], routes[-1][-1] + lastVal]
-					elif copy[node][routeNode][route][INITIAL]:
+							answer = routes + [lastVal, copy[node][routeNode][route][PROFIT], routes[-1][-1] + lastVal]
+							if answer not in answers:
+								answers = answers + [answer]
+								if len(answers) == MAX_ANSWERS:
+									return DONE
+					elif copy[node][routeNode][route][INITIAL] and routes[-1][-1] + lastVal not in copy.nodes:
 						spec_copy = spectrum[:]
 						spec_copy.remove(node + copy[node][routeNode][route][VALUE])
 						if len(spec_copy) == positive_errors:
-							lastVal = copy[node][routeNode][route][VALUE]
-							return routes + [lastVal, max_profit - neg_errors_left, routes[-1][-1] + lastVal]
+							answer = routes + [lastVal, copy[node][routeNode][route][PROFIT], routes[-1][-1] + lastVal]
+							if answer not in answers:
+								answers = answers + [answer]
+								if len(answers) == MAX_ANSWERS:
+									return DONE
 				elif neg_errors_left + copy[node][routeNode][route][PROFIT] - max_profit >= 0 and copy[node][routeNode][route][PROFIT] == i:
-					print("    " * (max_depth - depth) + "Going to " + routeNode + " by " + copy[node][routeNode][route][VALUE] + " with profit " + str(copy[node][routeNode][route][PROFIT]))
+					# print("    " * (max_depth - depth) + "Going to " + routeNode + " by " + copy[node][routeNode][route][VALUE] + " with profit " + str(copy[node][routeNode][route][PROFIT]))
 					spec_copy = spectrum[:]
 					if copy[node][routeNode][route][INITIAL]:
 						spec_copy.remove(node + copy[node][routeNode][route][VALUE])
@@ -73,8 +86,9 @@ def _check_node(copy, node, depth, routes, spectrum, neg_errors_left):
 					if type(ret) is not bool:
 						return ret
 					else:
-						print("    " * (max_depth - depth) + "Bad route :( Moving back....")
-	print("    " * (max_depth - depth) + "Really bad node!!! Moving back harder.....")
+						# print("    " * (max_depth - depth) + "Bad route :( Moving back....")
+						pass
+	# print("    " * (max_depth - depth) + "Really bad node!!! Moving back harder.....")
 	return False
 
 
@@ -90,47 +104,46 @@ def _remove_edges(G, node, val):
 	return copied
 
 
-def _make_spectrum_nice_no_errors(arr, length):
-	if type(arr) is bool:
-		print("Couldn't find proper spectrum....")
-		return
-	for i in range(len(arr)):
-		if i == 0:
-			continue
-		elif i % 2 == 0:
-			arr[i] = arr[i][-1]
-	sp = ''.join(arr[0::2])
-	print(sp)
-	values = []
-	for i in range(len(sp)-length+1):
-		values.append(sp[i:i+length])
-	print(values)
+def _make_answers_nice():
+	global answers
+	if len(answers) == 0:
+		print("Couldn't find anything...")
+	j = 0
+	for answer in answers:
+		spec = [answer[0]]
+		j += 1
+		values = []
+		err_sum = 0
+		for i in range(len(answer)):
+			if i == len(answer) - 1:
+				pass
+			elif i % 3 == 0:
+				values.append(answer[i] + answer[i+1])
+			elif i % 3 == 2:
+				if i == len(answer) - 2:
+					if err_sum == 0 and negative_errors > 1 and length < 4:
+						spec.append(answer[i - 1] + 'X' * max(0, negative_errors - length + 1) + answer[i + 1])
+					else:
+						spec.append(answer[i + 1][len(answer[i + 1]) - err_sum - 1:])
+				else:
+					err_sum += max_profit - answer[i]
+					if answer[i] == 0 and length < 4:
+						spec.append(answer[i - 1] + answer[i + 1][answer[i]:])
+					else:
+						spec.append(answer[i+1][answer[i]-1:])
+		print("Answer " + str(j) + ": ")
+		print(answer)
+		print(values)
+		print(''.join(spec) + ", Length: " + str(len(''.join(spec))))
 
-
-def _make_spectrum_nice_with_errors(arr, length):
-	print(arr)
-	if type(arr) is bool:
-		print("Couldn't find proper spectrum....")
-		return
-	for i in range(len(arr)):
-		if i == 0:
-			continue
-		elif i % 2 == 0:
-			arr[i] = arr[i][-1]
-	sp = ''.join(arr[0::2])
-	# print(sp)
-	values = []
-	for i in range(len(sp)-length+1):
-		values.append(sp[i:i+length])
-	# print(values)
-
+	return
 
 if __name__ == '__main__':
-	positive_errors = 1
-	negative_errors = 1
-	spectrum = ["AAA", "GTA", "CGC", "ACA", "CAC", "ACG", "CAA", "GCA", "ACT", "TTA", "CTT", "TAA"]
+	positive_errors = 0
+	negative_errors = 2
+	spectrum = ["AAA", "AAC", "CGC", "ACA", "CAC", "ACG", "CAA", "GCA", "ACT", "TTA", "CTT", "TAA"]
 	# spectrum = ["AAAAAACT", "AAAAACTA", "AAAACTAA", "AAACTAAG", "AACTAAGG", "ACTAAGGT", "CTAAGGTC", "TAAGGTCC", "AAGGTCCC", "AGGTCCCT", "GGTCCCTG", "GTCCCTGA"]
-	# spectrum = ["ACG", "CCG", "CGA", "CGT", "GAC"]
+	# spectrum = ["ACG", "CGC", "GCA", "CAA", "AAT"]
 
 	max_depth = len(spectrum) - positive_errors
 	max_profit = len(spectrum[0]) - 1
@@ -144,5 +157,6 @@ if __name__ == '__main__':
 			break
 	if not stop:
 		graph = _create_graph(spectrum, length)
-		_make_spectrum_nice_with_errors(_find_euler(graph, spectrum, negative_errors), length)
+		_find_euler(graph, spectrum, negative_errors)
+		_make_answers_nice()
 
