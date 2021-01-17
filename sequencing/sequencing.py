@@ -28,7 +28,7 @@ def _create_graph(spect, l):
 					isInSpec = 0
 				for x in range(l-1, -1, -1):
 					if x == 0:
-						arr.append((el[:-1], vertTo, {PROFIT: max(x - isInSpec, 0), VALUE: el[-1], INITIAL: isInSpec == 0}))
+						arr.append((el[:-1], vertTo, {PROFIT: 0, VALUE: el[-1], INITIAL: isInSpec == 0}))
 						break
 					elif el[l-x:] == vertTo[:x]:
 						arr.append((el[:-1], vertTo, {PROFIT: x - isInSpec, VALUE: el[-1], INITIAL: isInSpec == 0}))
