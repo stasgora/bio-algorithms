@@ -3,7 +3,7 @@ import networkx as nx
 PROFIT = 'profit'
 VALUE = 'value'
 INITIAL = 'initial'
-MAX_ANSWERS = 100
+MAX_ANSWERS = 1
 FILE = 'data.txt'
 
 max_depth = 0
@@ -50,7 +50,6 @@ def _find_euler(G, spectrum, neg_errors):
 
 
 def _check_node(copy, node, depth, routes, spectrum, neg_errors_left):
-	# print("    " * (max_depth - depth) + "Checking " + node + "'s edges")
 	for routeNode in copy[node]:
 		for route in copy[node][routeNode]:
 			for i in range(max_profit, -1, -1):
@@ -58,7 +57,6 @@ def _check_node(copy, node, depth, routes, spectrum, neg_errors_left):
 					global answers
 					lastVal = copy[node][routeNode][route][VALUE]
 					if neg_errors_left + copy[node][routeNode][route][PROFIT] - max_profit == 0:
-						# print("Finished checking! Returning results...")
 						spec_copy = spectrum[:]
 						if copy[node][routeNode][route][INITIAL]:
 							spec_copy.remove(node + copy[node][routeNode][route][VALUE])
@@ -78,17 +76,12 @@ def _check_node(copy, node, depth, routes, spectrum, neg_errors_left):
 								if len(answers) == MAX_ANSWERS:
 									return []
 				elif neg_errors_left + copy[node][routeNode][route][PROFIT] - max_profit >= 0 and copy[node][routeNode][route][PROFIT] == i:
-					# print("    " * (max_depth - depth) + "Going to " + routeNode + " by " + copy[node][routeNode][route][VALUE] + " with profit " + str(copy[node][routeNode][route][PROFIT]))
 					spec_copy = spectrum[:]
 					if copy[node][routeNode][route][INITIAL]:
 						spec_copy.remove(node + copy[node][routeNode][route][VALUE])
 					ret = _check_node(_remove_edges(copy, node, copy[node][routeNode][route][VALUE]), routeNode, depth - 1, routes + [copy[node][routeNode][route][VALUE], copy[node][routeNode][route][PROFIT], routeNode], spec_copy, neg_errors_left + copy[node][routeNode][route][PROFIT] - max_profit)
 					if type(ret) is not bool:
 						return ret
-					else:
-						# print("    " * (max_depth - depth) + "Bad route :( Moving back....")
-						pass
-	# print("    " * (max_depth - depth) + "Really bad node!!! Moving back harder.....")
 	return False
 
 
@@ -135,8 +128,8 @@ def _make_answers_nice():
 		print(answer)
 		print(values)
 		print(''.join(spec) + ", Length: " + str(len(''.join(spec))))
-
 	return
+
 
 if __name__ == '__main__':
 	f = open(FILE, "r")
