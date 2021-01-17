@@ -14,49 +14,47 @@ answers = []
 negative_errors = 0
 
 
-def _create_graph(spect, l):
+def _create_graph(spectrum, l):
+	print("--------------GRAPH--------------")
 	G = nx.MultiDiGraph()
-	vertices = list(set(map(lambda x: x[:-1], spect)))
+	vertices = list(set(map(lambda x: x[:-1], spectrum)))
 	letters = ['A', 'C', 'T', 'G']
-	arr = []
+	structure = []
 	for vertFrom in vertices:
 		for vertTo in vertices:
 			for ending in letters:
-				el = vertFrom + ending
-				isInSpec = 1
-				if el in spect:
-					isInSpec = 0
+				wordFrom = vertFrom + ending
+				isInSpectrum = 0 if wordFrom in spectrum else 1
 				for x in range(l-1, -1, -1):
 					if x == 0:
-						arr.append((el[:-1], vertTo, {PROFIT: 0, VALUE: el[-1], INITIAL: isInSpec == 0}))
+						structure.append((wordFrom[:-1], vertTo, {PROFIT: 0, VALUE: wordFrom[-1], INITIAL: isInSpectrum == 0}))
 						break
-					elif el[l-x:] == vertTo[:x]:
-						arr.append((el[:-1], vertTo, {PROFIT: x - isInSpec, VALUE: el[-1], INITIAL: isInSpec == 0}))
+					elif wordFrom[l-x:] == vertTo[:x]:
+						structure.append((wordFrom[:-1], vertTo, {PROFIT: x - isInSpectrum, VALUE: wordFrom[-1], INITIAL: isInSpectrum == 0}))
 						break
-	G.add_edges_from(arr)
-	print("--------------GRAPH--------------")
+	G.add_edges_from(structure)
 	print(list(G.edges(data=True)))
 	return G
 
 
-def _find_euler(G, spectrum, neg_errors):
+def _find_euler(G, spectrum, negative_errors):
 	print("--------------EULER--------------")
 	for val in G.nodes:
 		copy = G
-		ret = _check_node(copy.copy(), val, max_depth, [val], spectrum, neg_errors)
+		ret = _check_node(copy.copy(), val, max_depth, [val], spectrum, negative_errors)
 		if type(ret) is not bool:
 			break
 	return
 
 
-def _check_node(copy, node, depth, routes, spectrum, neg_errors_left):
+def _check_node(copy, node, depth, routes, spectrum, negative_errors_left):
 	for routeNode in copy[node]:
 		for route in copy[node][routeNode]:
 			for i in range(max_profit, -1, -1):
 				if depth == 1 and copy[node][routeNode][route][PROFIT] == i:
 					global answers
 					lastVal = copy[node][routeNode][route][VALUE]
-					if neg_errors_left + copy[node][routeNode][route][PROFIT] - max_profit == 0:
+					if negative_errors_left + copy[node][routeNode][route][PROFIT] - max_profit == 0:
 						spec_copy = spectrum[:]
 						if copy[node][routeNode][route][INITIAL]:
 							spec_copy.remove(node + copy[node][routeNode][route][VALUE])
@@ -75,7 +73,7 @@ def _check_node(copy, node, depth, routes, spectrum, neg_errors_left):
 								answers = answers + [answer]
 								if len(answers) == MAX_ANSWERS:
 									return []
-				elif neg_errors_left + copy[node][routeNode][route][PROFIT] - max_profit >= 0 and copy[node][routeNode][route][PROFIT] == i:
+				elif negative_errors_left + copy[node][routeNode][route][PROFIT] - max_profit >= 0 and copy[node][routeNode][route][PROFIT] == i:
 					spec_copy = spectrum[:]
 					if copy[node][routeNode][route][INITIAL]:
 						spec_copy.remove(node + copy[node][routeNode][route][VALUE])
