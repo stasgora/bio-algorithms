@@ -3,8 +3,8 @@ import networkx as nx
 PROFIT = 'profit'
 VALUE = 'value'
 INITIAL = 'initial'
-MAX_ANSWERS = 1
-FILE = 'data.txt'
+MAX_ANSWERS = 20
+FILE = 'data3.txt'
 
 max_depth = 0
 max_profit = 0
@@ -77,7 +77,7 @@ def _check_node(copy, node, depth, routes, spectrum, negative_errors_left):
 					spec_copy = spectrum[:]
 					if copy[node][routeNode][route][INITIAL]:
 						spec_copy.remove(node + copy[node][routeNode][route][VALUE])
-					ret = _check_node(_remove_edges(copy, node, copy[node][routeNode][route][VALUE]), routeNode, depth - 1, routes + [copy[node][routeNode][route][VALUE], copy[node][routeNode][route][PROFIT], routeNode], spec_copy, neg_errors_left + copy[node][routeNode][route][PROFIT] - max_profit)
+					ret = _check_node(_remove_edges(copy, node, copy[node][routeNode][route][VALUE]), routeNode, depth - 1, routes + [copy[node][routeNode][route][VALUE], copy[node][routeNode][route][PROFIT], routeNode], spec_copy, negative_errors_left + copy[node][routeNode][route][PROFIT] - max_profit)
 					if type(ret) is not bool:
 						return ret
 	return False
